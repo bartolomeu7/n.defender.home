@@ -1,0 +1,49 @@
+# Node / Vite
+node_modules/
+dist/
+dist-ssr/
+*.local
+.vite/
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+
+# Env / secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+id_rsa*
+*.pfx
+
+# Rust / Tauri
+launcher/src-tauri/target/
+launcher/src-tauri/gen/
+**/*.rs.bk
+
+# Evidence / PCAP / dumps — never commit
+evidence/**
+!evidence/.gitkeep
+*.pcap
+*.pcapng
+*.dmp
+*.mem
+*.evtx
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+*.swp
+
+# Local SQLite
+*.db
+*.db-journal
+*.sqlite
+*.sqlite3

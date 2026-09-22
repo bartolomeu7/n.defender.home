@@ -1,0 +1,7 @@
+{
+  "version": "2026.09.22.1",
+  "min_launcher": "1.0.0",
+  "artifacts": [],
+  "signature": null,
+  "note": "Exemplo. Releases reais precisam de hash e assinatura. Sem assinatura o launcher recusa."
+}
