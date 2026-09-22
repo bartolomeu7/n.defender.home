@@ -1,0 +1,37 @@
+# NEXUS DEFENDER — kill switch nftables (OpenWrt / Linux gateway)
+# Ajuste os nomes das interfaces: lan, wan, wg0.
+# Não use isto para bloquear redes de terceiros — só o próprio gateway.
+
+flush table inet nexus_ks
+table inet nexus_ks {
+  set lan_if {
+    type ifname
+    elements = { "br-lan", "lan" }
+  }
+
+  chain input {
+    type filter hook input priority 0; policy drop;
+    ct state established,related accept
+    iifname "lo" accept
+    iifname @lan_if accept
+    iifname "wg0" accept
+    udp dport 51820 accept
+  }
+
+  chain forward {
+    type filter hook forward priority 0; policy drop;
+    ct state established,related accept
+    iifname @lan_if oifname "wg0" accept
+    iifname "wg0" oifname @lan_if accept
+    iifname @lan_if oifname "wan" drop
+  }
+
+  chain output {
+    type filter hook output priority 0; policy drop;
+    ct state established,related accept
+    oifname "lo" accept
+    oifname "wg0" accept
+    oifname @lan_if accept
+    udp dport 51820 accept
+  }
+}

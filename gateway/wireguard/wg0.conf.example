@@ -1,0 +1,21 @@
+# NEXUS DEFENDER — WireGuard template (Fase 3)
+# Copie para fora do Git e substitua PLACEHOLDER_*.
+# Full tunnel + hooks de kill switch no Linux (wg-quick).
+# Windows: use o cliente oficial e marque "Block untunneled traffic".
+
+[Interface]
+Address = PLACEHOLDER_CLIENT_ADDR/32
+PrivateKey = PLACEHOLDER_CLIENT_PRIVATE_KEY
+DNS = PLACEHOLDER_TUNNEL_DNS
+ListenPort = 51820
+
+# Linux / wg-quick — drop default outbound; keep WG + LAN
+PostUp = nft -f /etc/nexus-defender/nft-killswitch.nft
+PostDown = nft delete table inet nexus_ks 2>/dev/null || true
+
+[Peer]
+PublicKey = PLACEHOLDER_PEER_PUBLIC_KEY
+PresharedKey = PLACEHOLDER_PSK
+Endpoint = PLACEHOLDER_ENDPOINT:51820
+AllowedIPs = 0.0.0.0/0, ::/0
+PersistentKeepalive = 25

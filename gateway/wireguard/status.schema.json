@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "NEXUS gateway-status",
+  "type": "object",
+  "required": [
+    "enabled",
+    "killSwitch",
+    "peer",
+    "handshakeOk",
+    "dnsThroughTunnel",
+    "ipv6Policy"
+  ],
+  "properties": {
+    "enabled": { "type": "boolean" },
+    "killSwitch": { "type": "boolean" },
+    "peer": { "type": "string" },
+    "interface": { "type": "string" },
+    "observedExit": { "type": "string" },
+    "handshakeOk": { "type": "boolean" },
+    "dnsThroughTunnel": { "type": "boolean" },
+    "ipv6Policy": { "enum": ["blocked", "tunneled", "unknown"] },
+    "updatedAt": { "type": "string" }
+  }
+}
