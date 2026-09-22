@@ -1,5 +1,39 @@
 import type { RiskInput, RiskResult } from "../types/contracts";
 
+export interface SensorCheck {
+  id: string;
+  name: string;
+  state: string;
+  detail: string;
+}
+
+export interface EndpointHealth {
+  overall: string;
+  host: string;
+  checks: SensorCheck[];
+}
+
+export interface NexusEvent {
+  id?: number;
+  ts: string;
+  source: string;
+  host: string;
+  event: string;
+  summary: string;
+  severity: number;
+  image?: string | null;
+  sha256?: string | null;
+}
+
+export interface IncidentRow {
+  id: number;
+  ts: string;
+  title: string;
+  score: number;
+  action: string;
+  source: string;
+}
+
 async function invokeSafe<T>(cmd: string, args?: Record<string, unknown>): Promise<T | null> {
   try {
     const { invoke } = await import("@tauri-apps/api/core");
@@ -35,4 +69,35 @@ export async function scoreRisk(input: RiskInput): Promise<RiskResult> {
 
 export async function listAudit(): Promise<string[]> {
   return (await invokeSafe<string[]>("list_audit")) ?? ["UI fallback — vault local ainda não ligado"];
+}
+
+export async function fetchEndpointHealth(): Promise<EndpointHealth> {
+  return (
+    (await invokeSafe<EndpointHealth>("endpoint_health")) ?? {
+      overall: "degraded",
+      host: "ui-only",
+      checks: [
+        { id: "sysmon", name: "Sysmon", state: "offline", detail: "Abra o launcher Tauri no Windows" },
+        { id: "wazuh", name: "Wazuh Agent", state: "offline", detail: "Abra o launcher Tauri no Windows" },
+        { id: "vault", name: "Evidence Vault", state: "normal", detail: "UI fallback" },
+        { id: "velociraptor", name: "Velociraptor", state: "offline", detail: "Opcional" },
+      ],
+    }
+  );
+}
+
+export async function fetchEvents(): Promise<NexusEvent[]> {
+  return (await invokeSafe<NexusEvent[]>("list_events")) ?? [];
+}
+
+export async function fetchIncidents(): Promise<IncidentRow[]> {
+  return (await invokeSafe<IncidentRow[]>("list_incidents")) ?? [];
+}
+
+export async function recordFimTest(): Promise<NexusEvent | null> {
+  return invokeSafe<NexusEvent>("record_fim_test");
+}
+
+export async function recordProcessTest(): Promise<NexusEvent | null> {
+  return invokeSafe<NexusEvent>("record_process_test");
 }
