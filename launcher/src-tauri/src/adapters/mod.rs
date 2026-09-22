@@ -1,6 +1,7 @@
 //! Adapters talk to local defensive engines only.
 
 pub mod endpoint;
+pub mod gateway;
 
 pub struct AdapterHealth {
     pub name: &'static str,

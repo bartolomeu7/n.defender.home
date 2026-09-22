@@ -14,10 +14,12 @@ pub fn run() {
             commands::list_audit,
             commands::forbidden_actions,
             commands::endpoint_health,
+            commands::gateway_health,
             commands::list_events,
             commands::list_incidents,
             commands::record_fim_test,
-            commands::record_process_test
+            commands::record_process_test,
+            commands::record_vpn_check
         ])
         .run(tauri::generate_context!())
         .expect("error while running NEXUS DEFENDER");

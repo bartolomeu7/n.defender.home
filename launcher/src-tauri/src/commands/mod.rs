@@ -1,4 +1,5 @@
 use crate::adapters::endpoint::{self, EndpointHealth};
+use crate::adapters::gateway::{self, GatewayHealth};
 use crate::evidence::{self, IncidentRow, NexusEvent};
 use crate::policy::{self, RiskInput, RiskResult};
 
@@ -36,6 +37,16 @@ pub fn endpoint_health() -> EndpointHealth {
 }
 
 #[tauri::command]
+pub fn gateway_health() -> GatewayHealth {
+    let health = gateway::probe();
+    let _ = evidence::append_audit(&format!(
+        "gateway_health {} ks={} hs={}",
+        health.overall, health.kill_switch, health.handshake_ok
+    ));
+    health
+}
+
+#[tauri::command]
 pub fn list_events() -> Vec<NexusEvent> {
     evidence::list_events(100).unwrap_or_default()
 }
@@ -53,4 +64,15 @@ pub fn record_fim_test() -> Result<NexusEvent, String> {
 #[tauri::command]
 pub fn record_process_test() -> Result<NexusEvent, String> {
     evidence::process_test().map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+pub fn record_vpn_check() -> Result<NexusEvent, String> {
+    let h = gateway::probe();
+    let severity = if h.handshake_ok && h.kill_switch { 2 } else { 6 };
+    let summary = format!(
+        "VPN {} peer={} ks={} dns={} ipv6={}",
+        h.overall, h.peer, h.kill_switch, h.dns_through_tunnel, h.ipv6_policy
+    );
+    evidence::vpn_check(&summary, severity).map_err(|e| e.to_string())
 }
