@@ -1,0 +1,25 @@
+<!--
+  Regras locais defensivas. IDs na faixa custom 100100-100199.
+  Não disparam ação ofensiva.
+-->
+<group name="nexus,windows,">
+  <rule id="100101" level="7">
+    <if_sid>550</if_sid>
+    <match>C:\\NexusDefender</match>
+    <description>NEXUS FIM: alteração em C:\NexusDefender</description>
+  </rule>
+
+  <rule id="100102" level="10">
+    <decoded_as>windows_eventchannel</decoded_as>
+    <field name="win.system.eventID">1</field>
+    <field name="win.eventdata.image">\\Temp\\</field>
+    <description>NEXUS Sysmon: processo criado a partir de Temp</description>
+  </rule>
+
+  <rule id="100103" level="12">
+    <decoded_as>windows_eventchannel</decoded_as>
+    <field name="win.system.eventID">3</field>
+    <field name="win.eventdata.destinationPort">22</field>
+    <description>NEXUS Sysmon: conexão de saída SSH observada</description>
+  </rule>
+</group>

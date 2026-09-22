@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  NEXUS DEFENDER — Sysmon profile v1 (Fase 2)
+  Telemetria defensiva. Ajuste includes/excludes para reduzir ruído.
+  Schema alinhado à documentação Sysinternals.
+-->
+<Sysmon schemaversion="4.90">
+  <HashAlgorithms>SHA256</HashAlgorithms>
+  <CheckRevocation/>
+  <DnsLookup>False</DnsLookup>
+  <ArchiveDirectory>nexus-sysmon</ArchiveDirectory>
+  <EventFiltering>
+    <RuleGroup name="process" groupRelation="or">
+      <ProcessCreate onmatch="include">
+        <Image condition="contains">\Temp\</Image>
+        <Image condition="contains">\AppData\Local\Temp\</Image>
+        <Image condition="contains">\AppData\Roaming\</Image>
+        <Image condition="contains">\Users\Public\</Image>
+        <Image condition="end with">.exe</Image>
+        <Image condition="end with">.dll</Image>
+        <Image condition="end with">.scr</Image>
+      </ProcessCreate>
+      <ProcessCreate onmatch="exclude">
+        <Image condition="is">C:\Windows\System32\svchost.exe</Image>
+        <Image condition="is">C:\Windows\System32\SearchIndexer.exe</Image>
+        <Image condition="is">C:\Windows\System32\RuntimeBroker.exe</Image>
+        <ParentImage condition="is">C:\Windows\System32\services.exe</ParentImage>
+      </ProcessCreate>
+    </RuleGroup>
+
+    <RuleGroup name="network" groupRelation="or">
+      <NetworkConnect onmatch="include">
+        <DestinationPort condition="is">22</DestinationPort>
+        <DestinationPort condition="is">23</DestinationPort>
+        <DestinationPort condition="is">3389</DestinationPort>
+        <DestinationPort condition="is">445</DestinationPort>
+        <DestinationPort condition="is">5985</DestinationPort>
+        <DestinationPort condition="is">5986</DestinationPort>
+        <Image condition="contains">\Temp\</Image>
+        <Image condition="contains">\AppData\</Image>
+      </NetworkConnect>
+      <NetworkConnect onmatch="exclude">
+        <DestinationIp condition="is">127.0.0.1</DestinationIp>
+        <DestinationIp condition="is">::1</DestinationIp>
+      </NetworkConnect>
+    </RuleGroup>
+
+    <RuleGroup name="file" groupRelation="or">
+      <FileCreate onmatch="include">
+        <TargetFilename condition="end with">.exe</TargetFilename>
+        <TargetFilename condition="end with">.dll</TargetFilename>
+        <TargetFilename condition="end with">.ps1</TargetFilename>
+        <TargetFilename condition="end with">.js</TargetFilename>
+        <TargetFilename condition="contains">\Startup\</TargetFilename>
+      </FileCreate>
+    </RuleGroup>
+
+    <RuleGroup name="dns" groupRelation="or">
+      <DnsQuery onmatch="exclude">
+        <QueryName condition="end with">.microsoft.com</QueryName>
+        <QueryName condition="end with">.windows.com</QueryName>
+        <QueryName condition="end with">.windowsupdate.com</QueryName>
+      </DnsQuery>
+    </RuleGroup>
+
+    <RuleGroup name="registry-persistence" groupRelation="or">
+      <RegistryEvent onmatch="include">
+        <TargetObject condition="contains">\CurrentVersion\Run</TargetObject>
+        <TargetObject condition="contains">\CurrentVersion\RunOnce</TargetObject>
+        <TargetObject condition="contains">\Services\</TargetObject>
+      </RegistryEvent>
+    </RuleGroup>
+  </EventFiltering>
+</Sysmon>
