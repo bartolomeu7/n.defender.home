@@ -218,3 +218,17 @@ pub fn process_test() -> Result<NexusEvent, rusqlite::Error> {
         sha256: None,
     })
 }
+
+pub fn vpn_check(summary: &str, severity: i32) -> Result<NexusEvent, rusqlite::Error> {
+    record_event(NexusEvent {
+        id: None,
+        ts: Utc::now().to_rfc3339(),
+        source: "vpn".into(),
+        host: std::env::var("COMPUTERNAME").unwrap_or_else(|_| "PC-01".into()),
+        event: "vpn_check".into(),
+        summary: summary.into(),
+        severity,
+        image: Some("wg0".into()),
+        sha256: None,
+    })
+}
