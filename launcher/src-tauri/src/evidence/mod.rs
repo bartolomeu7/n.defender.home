@@ -219,6 +219,20 @@ pub fn process_test() -> Result<NexusEvent, rusqlite::Error> {
     })
 }
 
+pub fn network_alert(summary: &str, severity: i32) -> Result<NexusEvent, rusqlite::Error> {
+    record_event(NexusEvent {
+        id: None,
+        ts: Utc::now().to_rfc3339(),
+        source: "suricata".into(),
+        host: std::env::var("COMPUTERNAME").unwrap_or_else(|_| "sensor-01".into()),
+        event: "ids_alert".into(),
+        summary: summary.into(),
+        severity,
+        image: Some("eth1".into()),
+        sha256: None,
+    })
+}
+
 pub fn vpn_check(summary: &str, severity: i32) -> Result<NexusEvent, rusqlite::Error> {
     record_event(NexusEvent {
         id: None,
