@@ -18,4 +18,4 @@ LAUNCHER (Tauri 2 + React/TS + Rust)
 - **C — SOC pessoal:** Security Onion + Zeek + Arkime + CTI em VMs + honeypots isolados.
 
 ## Fase atual
-Fase 3 — Gateway: WireGuard + kill switch + DNS no túnel + health via `gateway-status.json`.
+Fase 4 — Rede: Suricata + Zeek + Security Onion (status file) + alertas de laboratório no vault.
