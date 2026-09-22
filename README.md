@@ -19,7 +19,12 @@ Launcher Tauri 2 + React/TypeScript + Rust que coordena:
 ## O que isto **não** é
 Exploração de terceiros, DDoS, roubo de credenciais, persistência em terceiros, exfiltração ou contra-ataque ofensivo.
 
-## Fase 3 (atual)
+## Fase 4 (atual)
+- Templates Suricata (IDS) + Zeek + notas Security Onion
+- Health `network-status.json`
+- Tela Rede com alerta de laboratório
+
+## Fase 3
 - Templates WireGuard / nftables / OPNsense (sem chaves)
 - Kill switch + DNS no túnel + política IPv6
 - Health `gateway-status.json` + serviço WireGuard local
@@ -61,14 +66,15 @@ npm run tauri dev
 - [Fase 1](docs/PHASE1.md)
 - [Fase 2](docs/PHASE2.md)
 - [Fase 3](docs/PHASE3.md)
+- [Fase 4](docs/PHASE4.md)
 - [Segurança](SECURITY.md)
 - Manual de referência: *NEXUS DEFENDER — Manual técnico v1.0* (22/09/2026)
 
 ## Roadmap
 1. Launcher + UI
 2. Endpoint (Sysmon + Wazuh)
-3. Gateway + WireGuard + kill switch ← atual
-4. Security Onion / Suricata / Zeek
+3. Gateway + WireGuard + kill switch
+4. Security Onion / Suricata / Zeek ← atual
 5. CTI + updater assinado
 6. Deception isolada
 7. Response engine

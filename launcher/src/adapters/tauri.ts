@@ -47,6 +47,19 @@ export interface GatewayHealth {
   source: string;
 }
 
+export interface NetworkHealth {
+  overall: string;
+  suricata: string;
+  zeek: string;
+  securityOnion: string;
+  arkime: string;
+  interface: string;
+  homeNet: string;
+  alertsLastHour: number;
+  mode: string;
+  source: string;
+}
+
 async function invokeSafe<T>(cmd: string, args?: Record<string, unknown>): Promise<T | null> {
   try {
     const { invoke } = await import("@tauri-apps/api/core");
@@ -134,4 +147,25 @@ export async function fetchGatewayHealth(): Promise<GatewayHealth> {
 
 export async function recordVpnCheck(): Promise<NexusEvent | null> {
   return invokeSafe<NexusEvent>("record_vpn_check");
+}
+
+export async function fetchNetworkHealth(): Promise<NetworkHealth> {
+  return (
+    (await invokeSafe<NetworkHealth>("network_health")) ?? {
+      overall: "offline",
+      suricata: "absent",
+      zeek: "absent",
+      securityOnion: "absent",
+      arkime: "absent",
+      interface: "—",
+      homeNet: "—",
+      alertsLastHour: 0,
+      mode: "ids",
+      source: "ui-only",
+    }
+  );
+}
+
+export async function recordIdsTest(): Promise<NexusEvent | null> {
+  return invokeSafe<NexusEvent>("record_ids_test");
 }
