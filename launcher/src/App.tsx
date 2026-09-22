@@ -2,33 +2,36 @@ import { useCallback, useEffect, useState } from "react";
 import {
   fetchEndpointHealth,
   fetchEvents,
+  fetchGatewayHealth,
   fetchIncidents,
   type EndpointHealth,
+  type GatewayHealth,
   type IncidentRow,
   type NexusEvent,
 } from "./adapters/tauri";
 import { Dashboard } from "./features/dashboard/Dashboard";
 import { EndpointView } from "./features/endpoint/EndpointView";
+import { VpnView } from "./features/vpn/VpnView";
 import {
   EvidenceView,
   IntelligenceView,
   NetworkView,
   SimulationsView,
   ThreatsView,
-  VpnView,
   WifiView,
 } from "./features/PlaceholderViews";
-import { vpn } from "./state/store";
 import { NAV, type ModuleId } from "./types/contracts";
 
 export default function App() {
   const [module, setModule] = useState<ModuleId>("dashboard");
   const [health, setHealth] = useState<EndpointHealth | null>(null);
+  const [gateway, setGateway] = useState<GatewayHealth | null>(null);
   const [events, setEvents] = useState<NexusEvent[]>([]);
   const [incidents, setIncidents] = useState<IncidentRow[]>([]);
 
   const refresh = useCallback(() => {
     void fetchEndpointHealth().then(setHealth);
+    void fetchGatewayHealth().then(setGateway);
     void fetchEvents().then(setEvents);
     void fetchIncidents().then(setIncidents);
   }, []);
@@ -39,7 +42,8 @@ export default function App() {
     return () => window.clearInterval(t);
   }, [refresh]);
 
-  const overall = health?.overall === "protected" ? "protected" : "degraded";
+  const overall =
+    health?.overall === "protected" && gateway?.overall === "protected" ? "protected" : "degraded";
 
   return (
     <div className="app">
@@ -53,7 +57,8 @@ export default function App() {
             {overall === "protected" ? "PROTECTED" : "DEGRADED"}
           </span>
           <span>
-            VPN / {vpn.enabled ? vpn.peer : "OFF"} / KILL SWITCH {vpn.killSwitch ? "ON" : "OFF"}
+            VPN / {gateway?.enabled ? gateway.peer : "OFF"} / KILL SWITCH{" "}
+            {gateway?.killSwitch ? "ON" : "OFF"}
           </span>
         </div>
       </header>
@@ -70,14 +75,19 @@ export default function App() {
       </nav>
       <main className="main">
         {module === "dashboard" && (
-          <Dashboard onOpenMatrix={() => setModule("simulations")} health={health} events={events} />
+          <Dashboard
+            onOpenMatrix={() => setModule("simulations")}
+            health={health}
+            gateway={gateway}
+            events={events}
+          />
         )}
         {module === "network" && <NetworkView />}
         {module === "endpoint" && (
           <EndpointView health={health} events={events} incidents={incidents} onRefresh={refresh} />
         )}
         {module === "wifi" && <WifiView />}
-        {module === "vpn" && <VpnView />}
+        {module === "vpn" && <VpnView gateway={gateway} onRefresh={refresh} />}
         {module === "threats" && <ThreatsView incidents={incidents} />}
         {module === "evidence" && <EvidenceView events={events} />}
         {module === "intelligence" && <IntelligenceView />}
