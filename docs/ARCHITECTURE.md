@@ -18,4 +18,4 @@ LAUNCHER (Tauri 2 + React/TS + Rust)
 - **C — SOC pessoal:** Security Onion + Zeek + Arkime + CTI em VMs + honeypots isolados.
 
 ## Fase atual
-Fase 1 — Launcher + UI + contratos + policy engine local + vault stub + simulação Matrix visual.
+Fase 2 — Endpoint: Sysmon + Wazuh health checks + timeline de incidentes no vault local.
