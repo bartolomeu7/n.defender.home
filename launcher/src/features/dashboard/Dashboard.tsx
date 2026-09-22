@@ -1,31 +1,42 @@
-import { events, overallHealth, sensors, vpn } from "../../state/store";
+import type { EndpointHealth, NexusEvent } from "../../adapters/tauri";
+import { vpn } from "../../state/store";
 
-export function Dashboard({ onOpenMatrix }: { onOpenMatrix: () => void }) {
-  const health = overallHealth(sensors);
+export function Dashboard({
+  onOpenMatrix,
+  health,
+  events,
+}: {
+  onOpenMatrix: () => void;
+  health: EndpointHealth | null;
+  events: NexusEvent[];
+}) {
+  const overall = health?.overall ?? "degraded";
   const criticals = events.filter((e) => e.severity >= 8).length;
   const bars = [20, 28, 18, 34, 22, 40, 26, 31, 19, 36, 24, 29];
+  const sysmon = health?.checks.find((c) => c.id === "sysmon");
+  const stream = events.slice(0, 8);
 
   return (
     <>
       <div className="banner">
-        Sensores de rede/endpoint ainda não implantados. O launcher nunca mostra PROTEGIDO sem telemetria real.
+        Sensores reais só entram no estado PROTEGIDO com heartbeat. Fase 2 consulta Sysmon/Wazuh no host local.
       </div>
       <div className="grid kpis">
         <div className="card">
           <h3>SEGURANÇA</h3>
-          <div className={`kpi-value ${health === "protected" ? "" : "warn"}`}>
-            {health === "protected" ? "PROTEGIDO" : "DEGRADADO"}
+          <div className={`kpi-value ${overall === "protected" ? "" : "warn"}`}>
+            {overall === "protected" ? "PROTEGIDO" : "DEGRADADO"}
           </div>
         </div>
         <div className="card">
-          <h3>REDE</h3>
-          <div className="kpi-value warn">SEM SENSOR</div>
+          <h3>ENDPOINT</h3>
+          <div className={`kpi-value ${sysmon?.state === "normal" ? "" : "warn"}`}>
+            {sysmon?.state?.toUpperCase() ?? "SEM SENSOR"}
+          </div>
         </div>
         <div className="card">
           <h3>VPN</h3>
-          <div className={`kpi-value ${vpn.enabled ? "" : "bad"}`}>
-            {vpn.enabled ? `${vpn.peer}` : "OFF"}
-          </div>
+          <div className={`kpi-value ${vpn.enabled ? "" : "bad"}`}>{vpn.enabled ? `${vpn.peer}` : "OFF"}</div>
         </div>
         <div className="card">
           <h3>CRÍTICAS</h3>
@@ -36,9 +47,11 @@ export function Dashboard({ onOpenMatrix }: { onOpenMatrix: () => void }) {
         <div className="card">
           <h3>EVENT STREAM</h3>
           <ul className="stream">
-            {events.map((e) => (
-              <li key={e.id}>
-                <span className="muted">{e.ts}</span> <span className="src">{e.source}</span>
+            {stream.length === 0 && <li className="muted">Aguardando eventos do vault / sensores.</li>}
+            {stream.map((e) => (
+              <li key={`${e.id}-${e.ts}`}>
+                <span className="muted">{(e.ts.split("T")[1] || e.ts).slice(0, 8)}</span>{" "}
+                <span className="src">{e.source}</span>
                 {e.summary}
               </li>
             ))}
