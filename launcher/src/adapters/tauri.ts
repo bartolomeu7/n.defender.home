@@ -34,6 +34,19 @@ export interface IncidentRow {
   source: string;
 }
 
+export interface GatewayHealth {
+  overall: string;
+  enabled: boolean;
+  killSwitch: boolean;
+  peer: string;
+  interface: string;
+  observedExit: string;
+  handshakeOk: boolean;
+  dnsThroughTunnel: boolean;
+  ipv6Policy: string;
+  source: string;
+}
+
 async function invokeSafe<T>(cmd: string, args?: Record<string, unknown>): Promise<T | null> {
   try {
     const { invoke } = await import("@tauri-apps/api/core");
@@ -100,4 +113,25 @@ export async function recordFimTest(): Promise<NexusEvent | null> {
 
 export async function recordProcessTest(): Promise<NexusEvent | null> {
   return invokeSafe<NexusEvent>("record_process_test");
+}
+
+export async function fetchGatewayHealth(): Promise<GatewayHealth> {
+  return (
+    (await invokeSafe<GatewayHealth>("gateway_health")) ?? {
+      overall: "offline",
+      enabled: false,
+      killSwitch: false,
+      peer: "—",
+      interface: "wg0",
+      observedExit: "isp",
+      handshakeOk: false,
+      dnsThroughTunnel: false,
+      ipv6Policy: "unknown",
+      source: "ui-only",
+    }
+  );
+}
+
+export async function recordVpnCheck(): Promise<NexusEvent | null> {
+  return invokeSafe<NexusEvent>("record_vpn_check");
 }
