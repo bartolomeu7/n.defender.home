@@ -1,13 +1,14 @@
-import type { EndpointHealth, NexusEvent } from "../../adapters/tauri";
-import { vpn } from "../../state/store";
+import type { EndpointHealth, GatewayHealth, NexusEvent } from "../../adapters/tauri";
 
 export function Dashboard({
   onOpenMatrix,
   health,
+  gateway,
   events,
 }: {
   onOpenMatrix: () => void;
   health: EndpointHealth | null;
+  gateway: GatewayHealth | null;
   events: NexusEvent[];
 }) {
   const overall = health?.overall ?? "degraded";
@@ -19,7 +20,7 @@ export function Dashboard({
   return (
     <>
       <div className="banner">
-        Sensores reais só entram no estado PROTEGIDO com heartbeat. Fase 2 consulta Sysmon/Wazuh no host local.
+        Sensores reais só entram no estado PROTEGIDO com heartbeat. Fase 3 lê Sysmon/Wazuh e o status do gateway.
       </div>
       <div className="grid kpis">
         <div className="card">
@@ -36,7 +37,9 @@ export function Dashboard({
         </div>
         <div className="card">
           <h3>VPN</h3>
-          <div className={`kpi-value ${vpn.enabled ? "" : "bad"}`}>{vpn.enabled ? `${vpn.peer}` : "OFF"}</div>
+          <div className={`kpi-value ${gateway?.enabled ? "" : "bad"}`}>
+            {gateway?.enabled ? `${gateway.peer}` : "OFF"}
+          </div>
         </div>
         <div className="card">
           <h3>CRÍTICAS</h3>
