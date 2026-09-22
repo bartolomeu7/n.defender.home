@@ -1,4 +1,5 @@
-use crate::evidence;
+use crate::adapters::endpoint::{self, EndpointHealth};
+use crate::evidence::{self, IncidentRow, NexusEvent};
 use crate::policy::{self, RiskInput, RiskResult};
 
 #[tauri::command]
@@ -25,4 +26,31 @@ pub fn list_audit() -> Vec<String> {
 #[tauri::command]
 pub fn forbidden_actions() -> Vec<String> {
     policy::FORBIDDEN.iter().map(|s| s.to_string()).collect()
+}
+
+#[tauri::command]
+pub fn endpoint_health() -> EndpointHealth {
+    let health = endpoint::probe();
+    let _ = evidence::append_audit(&format!("endpoint_health {}", health.overall));
+    health
+}
+
+#[tauri::command]
+pub fn list_events() -> Vec<NexusEvent> {
+    evidence::list_events(100).unwrap_or_default()
+}
+
+#[tauri::command]
+pub fn list_incidents() -> Vec<IncidentRow> {
+    evidence::list_incidents(50).unwrap_or_default()
+}
+
+#[tauri::command]
+pub fn record_fim_test() -> Result<NexusEvent, String> {
+    evidence::fim_test().map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+pub fn record_process_test() -> Result<NexusEvent, String> {
+    evidence::process_test().map_err(|e| e.to_string())
 }
