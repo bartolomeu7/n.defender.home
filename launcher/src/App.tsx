@@ -4,18 +4,20 @@ import {
   fetchEvents,
   fetchGatewayHealth,
   fetchIncidents,
+  fetchNetworkHealth,
   type EndpointHealth,
   type GatewayHealth,
   type IncidentRow,
+  type NetworkHealth,
   type NexusEvent,
 } from "./adapters/tauri";
 import { Dashboard } from "./features/dashboard/Dashboard";
 import { EndpointView } from "./features/endpoint/EndpointView";
+import { NetworkView } from "./features/network/NetworkView";
 import { VpnView } from "./features/vpn/VpnView";
 import {
   EvidenceView,
   IntelligenceView,
-  NetworkView,
   SimulationsView,
   ThreatsView,
   WifiView,
@@ -26,12 +28,14 @@ export default function App() {
   const [module, setModule] = useState<ModuleId>("dashboard");
   const [health, setHealth] = useState<EndpointHealth | null>(null);
   const [gateway, setGateway] = useState<GatewayHealth | null>(null);
+  const [network, setNetwork] = useState<NetworkHealth | null>(null);
   const [events, setEvents] = useState<NexusEvent[]>([]);
   const [incidents, setIncidents] = useState<IncidentRow[]>([]);
 
   const refresh = useCallback(() => {
     void fetchEndpointHealth().then(setHealth);
     void fetchGatewayHealth().then(setGateway);
+    void fetchNetworkHealth().then(setNetwork);
     void fetchEvents().then(setEvents);
     void fetchIncidents().then(setIncidents);
   }, []);
@@ -82,7 +86,9 @@ export default function App() {
             events={events}
           />
         )}
-        {module === "network" && <NetworkView />}
+        {module === "network" && (
+          <NetworkView network={network} events={events} onRefresh={refresh} />
+        )}
         {module === "endpoint" && (
           <EndpointView health={health} events={events} incidents={incidents} onRefresh={refresh} />
         )}
