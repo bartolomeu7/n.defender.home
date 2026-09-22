@@ -1,0 +1,8 @@
+{
+  "identifier": "default",
+  "description": "Control plane mínimo. Sem shell, FS arbitrário ou HTTP genérico.",
+  "windows": ["main"],
+  "permissions": [
+    "core:default"
+  ]
+}
