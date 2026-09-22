@@ -1,0 +1,13 @@
+# NEXUS DEFENDER — regras locais de laboratório (detect only).
+# SID 1002000-1002099. Sem payload ofensivo.
+
+alert http any any -> $HOME_NET any (msg:"NEXUS LAB testmynids uid"; \
+  flow:established,to_client; content:"uid="; http_client_body; \
+  classtype:not-suspicious; sid:1002001; rev:1;)
+
+alert dns any any -> any any (msg:"NEXUS LAB DNS query testmynids.org"; \
+  dns.query; content:"testmynids.org"; nocase; \
+  classtype:not-suspicious; sid:1002002; rev:1;)
+
+alert tcp $HOME_NET any -> $EXTERNAL_NET 22 (msg:"NEXUS LAB SSH outbound from LAN"; \
+  flags:S; classtype:not-suspicious; sid:1002003; rev:1;)

@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "NEXUS network-status",
+  "type": "object",
+  "required": ["suricata", "zeek", "mode"],
+  "properties": {
+    "suricata": { "enum": ["running", "stopped", "absent"] },
+    "zeek": { "enum": ["running", "stopped", "absent"] },
+    "securityOnion": { "enum": ["present", "absent"] },
+    "arkime": { "enum": ["running", "stopped", "offline", "absent"] },
+    "interface": { "type": "string" },
+    "homeNet": { "type": "string" },
+    "alertsLastHour": { "type": "integer", "minimum": 0 },
+    "mode": { "enum": ["ids", "ips"] },
+    "updatedAt": { "type": "string" }
+  }
+}
