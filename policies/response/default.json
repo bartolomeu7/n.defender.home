@@ -1,0 +1,28 @@
+{
+  "id": "response.default.v1",
+  "version": "1.0.0",
+  "scope": "own-infrastructure-only",
+  "formula": "risk = severity + confidence + repetition + asset_criticality + threat_intel_match - allowlist_bonus",
+  "levels": [
+    { "level": 0, "min": 0, "max": 24, "action": "LOG_ONLY", "note": "Nenhuma contenção" },
+    { "level": 1, "min": 25, "max": 49, "action": "ALERT", "note": "Notificar + enriquecer" },
+    { "level": 2, "min": 50, "max": 74, "action": "BLOCK", "note": "Bloquear conexão/IP/domínio da própria rede" },
+    { "level": 3, "min": 75, "max": 89, "action": "QUARANTINE_ISOLATE", "note": "Exige evidência corroborada" },
+    { "level": 4, "min": 90, "max": 100, "action": "EMERGENCY", "note": "Cortar/isolar própria rede; preservar evidência" }
+  ],
+  "forbidden": [
+    "exploit_third_party",
+    "ddos",
+    "credential_theft",
+    "third_party_persistence",
+    "exfiltrate_third_party",
+    "offensive_counterattack"
+  ],
+  "failSafe": {
+    "vpnDown": "kill_switch_blocks_wan_if_enabled",
+    "invalidRule": "do_not_load",
+    "unsignedRelease": "reject",
+    "sensorOffline": "show_degraded_never_protected",
+    "destructiveResponse": "requires_explicit_policy"
+  }
+}
