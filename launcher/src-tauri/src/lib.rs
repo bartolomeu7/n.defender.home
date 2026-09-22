@@ -19,6 +19,8 @@ pub fn run() {
             commands::list_incidents,
             commands::record_fim_test,
             commands::record_process_test,
+            commands::network_health,
+            commands::record_ids_test,
             commands::record_vpn_check
         ])
         .run(tauri::generate_context!())

@@ -2,6 +2,7 @@
 
 pub mod endpoint;
 pub mod gateway;
+pub mod network;
 
 pub struct AdapterHealth {
     pub name: &'static str,
