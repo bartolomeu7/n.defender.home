@@ -19,7 +19,13 @@ Launcher Tauri 2 + React/TypeScript + Rust que coordena:
 ## O que isto **não** é
 Exploração de terceiros, DDoS, roubo de credenciais, persistência em terceiros, exfiltração ou contra-ataque ofensivo.
 
-## Fase 1 (entregue neste commit)
+## Fase 2 (atual)
+- Health check Sysmon / Wazuh / vault no core Rust
+- Timeline de eventos e incidentes no SQLite local
+- Perfil Sysmon + snippet Wazuh + `scripts/windows/Install-Endpoint.ps1`
+- Testes controlados de processo e FIM no painel PC
+
+## Fase 1 (entregue)
 - UI cyberpunk com navegação completa
 - Simulação Matrix **visual-only**
 - Contratos TS + policy engine Rust
@@ -47,12 +53,13 @@ npm run tauri dev
 ## Documentação
 - [Arquitetura](docs/ARCHITECTURE.md)
 - [Fase 1](docs/PHASE1.md)
+- [Fase 2](docs/PHASE2.md)
 - [Segurança](SECURITY.md)
 - Manual de referência: *NEXUS DEFENDER — Manual técnico v1.0* (22/09/2026)
 
 ## Roadmap
-1. Launcher + UI ← atual
-2. Endpoint (Sysmon + Wazuh)
+1. Launcher + UI
+2. Endpoint (Sysmon + Wazuh) ← atual
 3. Gateway + WireGuard + kill switch
 4. Security Onion / Suricata / Zeek
 5. CTI + updater assinado

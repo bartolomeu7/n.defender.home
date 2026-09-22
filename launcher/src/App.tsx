@@ -1,7 +1,15 @@
-import { useMemo, useState } from "react";
-import { Dashboard } from "./features/dashboard/Dashboard";
+import { useCallback, useEffect, useState } from "react";
 import {
-  EndpointView,
+  fetchEndpointHealth,
+  fetchEvents,
+  fetchIncidents,
+  type EndpointHealth,
+  type IncidentRow,
+  type NexusEvent,
+} from "./adapters/tauri";
+import { Dashboard } from "./features/dashboard/Dashboard";
+import { EndpointView } from "./features/endpoint/EndpointView";
+import {
   EvidenceView,
   IntelligenceView,
   NetworkView,
@@ -10,12 +18,28 @@ import {
   VpnView,
   WifiView,
 } from "./features/PlaceholderViews";
-import { overallHealth, sensors, vpn } from "./state/store";
+import { vpn } from "./state/store";
 import { NAV, type ModuleId } from "./types/contracts";
 
 export default function App() {
   const [module, setModule] = useState<ModuleId>("dashboard");
-  const health = useMemo(() => overallHealth(sensors), []);
+  const [health, setHealth] = useState<EndpointHealth | null>(null);
+  const [events, setEvents] = useState<NexusEvent[]>([]);
+  const [incidents, setIncidents] = useState<IncidentRow[]>([]);
+
+  const refresh = useCallback(() => {
+    void fetchEndpointHealth().then(setHealth);
+    void fetchEvents().then(setEvents);
+    void fetchIncidents().then(setIncidents);
+  }, []);
+
+  useEffect(() => {
+    refresh();
+    const t = window.setInterval(refresh, 15000);
+    return () => window.clearInterval(t);
+  }, [refresh]);
+
+  const overall = health?.overall === "protected" ? "protected" : "degraded";
 
   return (
     <div className="app">
@@ -25,8 +49,8 @@ export default function App() {
         </div>
         <div className="status-row">
           <span>
-            <i className={`dot ${health === "protected" ? "ok" : "warn"}`} />
-            {health === "protected" ? "PROTECTED" : "DEGRADED"}
+            <i className={`dot ${overall === "protected" ? "ok" : "warn"}`} />
+            {overall === "protected" ? "PROTECTED" : "DEGRADED"}
           </span>
           <span>
             VPN / {vpn.enabled ? vpn.peer : "OFF"} / KILL SWITCH {vpn.killSwitch ? "ON" : "OFF"}
@@ -45,13 +69,17 @@ export default function App() {
         ))}
       </nav>
       <main className="main">
-        {module === "dashboard" && <Dashboard onOpenMatrix={() => setModule("simulations")} />}
+        {module === "dashboard" && (
+          <Dashboard onOpenMatrix={() => setModule("simulations")} health={health} events={events} />
+        )}
         {module === "network" && <NetworkView />}
-        {module === "endpoint" && <EndpointView />}
+        {module === "endpoint" && (
+          <EndpointView health={health} events={events} incidents={incidents} onRefresh={refresh} />
+        )}
         {module === "wifi" && <WifiView />}
         {module === "vpn" && <VpnView />}
-        {module === "threats" && <ThreatsView />}
-        {module === "evidence" && <EvidenceView />}
+        {module === "threats" && <ThreatsView incidents={incidents} />}
+        {module === "evidence" && <EvidenceView events={events} />}
         {module === "intelligence" && <IntelligenceView />}
         {module === "simulations" && <SimulationsView />}
       </main>
