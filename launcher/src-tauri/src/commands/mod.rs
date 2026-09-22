@@ -1,5 +1,6 @@
 use crate::adapters::endpoint::{self, EndpointHealth};
 use crate::adapters::gateway::{self, GatewayHealth};
+use crate::adapters::network::{self, NetworkHealth};
 use crate::evidence::{self, IncidentRow, NexusEvent};
 use crate::policy::{self, RiskInput, RiskResult};
 
@@ -64,6 +65,26 @@ pub fn record_fim_test() -> Result<NexusEvent, String> {
 #[tauri::command]
 pub fn record_process_test() -> Result<NexusEvent, String> {
     evidence::process_test().map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+pub fn network_health() -> NetworkHealth {
+    let health = network::probe();
+    let _ = evidence::append_audit(&format!(
+        "network_health {} suricata={} zeek={}",
+        health.overall, health.suricata, health.zeek
+    ));
+    health
+}
+
+#[tauri::command]
+pub fn record_ids_test() -> Result<NexusEvent, String> {
+    let h = network::probe();
+    let summary = format!(
+        "Alerta de laboratório IDS mode={} suricata={} iface={}",
+        h.mode, h.suricata, h.interface
+    );
+    evidence::network_alert(&summary, 5).map_err(|e| e.to_string())
 }
 
 #[tauri::command]
