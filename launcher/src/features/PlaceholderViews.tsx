@@ -1,5 +1,5 @@
 import { evidence, release, sensors, vpn } from "../state/store";
-import { scoreRisk } from "../adapters/tauri";
+import { scoreRisk, type IncidentRow, type NexusEvent } from "../adapters/tauri";
 import { useEffect, useState } from "react";
 import type { RiskResult } from "../types/contracts";
 import { MatrixWindow } from "../simulation/MatrixWindow";
@@ -35,35 +35,6 @@ export function NetworkView() {
   );
 }
 
-export function EndpointView() {
-  return (
-    <div className="card">
-      <h2>PC</h2>
-      <p className="muted">Wazuh Agent + Sysmon + Velociraptor. Fase 2 liga telemetria real e FIM.</p>
-      <table>
-        <thead>
-          <tr>
-            <th>Componente</th>
-            <th>Estado</th>
-            <th>Detalhe</th>
-          </tr>
-        </thead>
-        <tbody>
-          {sensors
-            .filter((s) => s.layer === "endpoint")
-            .map((s) => (
-              <tr key={s.id}>
-                <td>{s.name}</td>
-                <td>{s.state}</td>
-                <td>{s.detail}</td>
-              </tr>
-            ))}
-        </tbody>
-      </table>
-    </div>
-  );
-}
-
 export function WifiView() {
   return (
     <div className="card">
@@ -84,41 +55,20 @@ export function VpnView() {
       </p>
       <table>
         <tbody>
-          <tr>
-            <td>Ativa</td>
-            <td>{String(vpn.enabled)}</td>
-          </tr>
-          <tr>
-            <td>Kill switch</td>
-            <td>{String(vpn.killSwitch)}</td>
-          </tr>
-          <tr>
-            <td>Peer</td>
-            <td>{vpn.peer}</td>
-          </tr>
-          <tr>
-            <td>IP observado</td>
-            <td>{vpn.observedExit}</td>
-          </tr>
-          <tr>
-            <td>Handshake</td>
-            <td>{String(vpn.handshakeOk)}</td>
-          </tr>
-          <tr>
-            <td>DNS no túnel</td>
-            <td>{String(vpn.dnsThroughTunnel)}</td>
-          </tr>
-          <tr>
-            <td>IPv6</td>
-            <td>{vpn.ipv6Policy}</td>
-          </tr>
+          <tr><td>Ativa</td><td>{String(vpn.enabled)}</td></tr>
+          <tr><td>Kill switch</td><td>{String(vpn.killSwitch)}</td></tr>
+          <tr><td>Peer</td><td>{vpn.peer}</td></tr>
+          <tr><td>IP observado</td><td>{vpn.observedExit}</td></tr>
+          <tr><td>Handshake</td><td>{String(vpn.handshakeOk)}</td></tr>
+          <tr><td>DNS no túnel</td><td>{String(vpn.dnsThroughTunnel)}</td></tr>
+          <tr><td>IPv6</td><td>{vpn.ipv6Policy}</td></tr>
         </tbody>
       </table>
     </div>
   );
 }
 
-export function ThreatsView() {
+export function ThreatsView({ incidents = [] }: { incidents?: IncidentRow[] }) {
   const [demo, setDemo] = useState<RiskResult | null>(null);
   useEffect(() => {
     void scoreRisk({
@@ -137,7 +87,18 @@ export function ThreatsView() {
       <p className="muted">
         Score auditável: severity + confidence + repetition + asset_criticality + threat_intel_match − allowlist_bonus.
       </p>
-      <p>Nenhum incidente ativo.</p>
+      {incidents.length === 0 ? (
+        <p>Nenhum incidente ativo.</p>
+      ) : (
+        <ul className="stream">
+          {incidents.map((i) => (
+            <li key={i.id}>
+              <span className="src">{i.action}</span>
+              {i.title} <span className="muted">score {i.score}</span>
+            </li>
+          ))}
+        </ul>
+      )}
       {demo && (
         <p className="muted">
           Demo local: score {demo.score} · nível {demo.level} · ação {demo.action}
@@ -147,11 +108,30 @@ export function ThreatsView() {
   );
 }
 
-export function EvidenceView() {
+export function EvidenceView({ events = [] }: { events?: NexusEvent[] }) {
+  const hashed = events.filter((e) => e.sha256);
   return (
     <div className="card">
       <h2>EVIDÊNCIAS</h2>
       <p className="muted">Vault local. Hashes e timelines permanecem fora do GitHub.</p>
+      {hashed.length > 0 && (
+        <table>
+          <thead>
+            <tr>
+              <th>Evento</th>
+              <th>Hash local</th>
+            </tr>
+          </thead>
+          <tbody>
+            {hashed.map((e) => (
+              <tr key={`${e.id}-h`}>
+                <td>{e.summary}</td>
+                <td>{e.sha256}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
       <table>
         <thead>
           <tr>
@@ -183,22 +163,10 @@ export function IntelligenceView() {
       <p className="muted">GitHub privado só distribui regras/manifests assinados. Release inválido é recusado.</p>
       <table>
         <tbody>
-          <tr>
-            <td>Versão</td>
-            <td>{release.version}</td>
-          </tr>
-          <tr>
-            <td>Assinado</td>
-            <td>{String(release.signed)}</td>
-          </tr>
-          <tr>
-            <td>Hash</td>
-            <td>{String(release.hashValid)}</td>
-          </tr>
-          <tr>
-            <td>Status</td>
-            <td>{release.status}</td>
-          </tr>
+          <tr><td>Versão</td><td>{release.version}</td></tr>
+          <tr><td>Assinado</td><td>{String(release.signed)}</td></tr>
+          <tr><td>Hash</td><td>{String(release.hashValid)}</td></tr>
+          <tr><td>Status</td><td>{release.status}</td></tr>
         </tbody>
       </table>
     </div>
